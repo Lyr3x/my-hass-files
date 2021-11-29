@@ -53,7 +53,7 @@ blueprint:
 trigger:
   - platform: state
     entity_id: !input "window_entity"
-    to: "off"
+    to: "on"
     for: !input "minimum_open_time"
 action:
   - service: climate.set_temperature
@@ -64,7 +64,7 @@ action:
   - wait_for_trigger:
       - platform: state
         entity_id: !input "window_entity"
-        to: "on"
+        to: "off"
     continue_on_timeout: false
   - service: climate.set_temperature
     target:
