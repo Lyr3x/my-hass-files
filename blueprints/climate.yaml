@@ -52,19 +52,21 @@ blueprint:
     to_window_state:
       name: To window state
       description: The state the window sensor should be in to trigger the automation.
-      default: closed
+      default: on
       selector:
-        options:
-          - off
-          - on
+        select:
+          options:
+            - on
+            - off
     from_window_state:
       name: From window state
       description: The state the window sensor should comes from
-      default: closed
+      default: off
       selector:
-        options:
-          - off
-          - on
+        select:
+          options:
+            - on
+            - off
 trigger:
 - platform: state
   entity_id: !input 'window_entity'
