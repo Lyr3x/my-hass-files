@@ -29,9 +29,19 @@ blueprint:
       selector:
         entity:
           domain: climate
-    climate_temperature:
-      name: Climate Temperature
-      description: The temperature the climate entity is set to.
+    climate_off_temperature:
+      name: Climate off Temperature
+      description: The temperature the climate entity is set to when the window is open.
+      selector:
+        number:
+          min: 4.0
+          max: 30.0
+          unit_of_measurement: °C
+          mode: slider
+          step: 1.0
+    climate_on_temperature:
+      name: Climate on Temperature
+      description: The temperature the climate entity is set to when the window is closed.
       selector:
         number:
           min: 4.0
@@ -68,13 +78,17 @@ condition:
       state: !input 'from_window_state'
 action:
 - service: climate.set_temperature
-    data:
-      entity_id: !input 'climate_target'
-      temperature: !input 'climate_temperature'
+  target:
+    entity_id: !input 'climate_target'
+  data:
+    temperature: !input 'climate_off_temperature'
 - wait_for_trigger:
   - platform: state
     entity_id: !input 'window_entity'
     to: !input 'to_window_state'
   continue_on_timeout: false
-- service: climate.turn_on
-  entity_id: !input 'climate_target'
+- service: climate.set_temperature
+  target:
+    entity_id: !input 'climate_target'
+  data:
+    temperature: !input 'climate_on_temperature'
