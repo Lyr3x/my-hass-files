@@ -68,9 +68,9 @@ condition:
       state: !input 'from_window_state'
 action:
 - service: climate.set_temperature
-  data:
-    entity_id: !input 'climate_target'
-    temperature: !input 'climate_temperature'
+    data:
+      entity_id: !input 'climate_target'
+      temperature: !input 'climate_temperature'
 - wait_for_trigger:
   - platform: state
     entity_id: !input 'window_entity'
