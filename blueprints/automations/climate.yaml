@@ -54,7 +54,7 @@ trigger:
   - platform: state
     entity_id: !input "window_entity"
     to: "on"
-    for: !input "minimum_open_time"
+    for: !input "minimum_open_time"s
 action:
   - service: climate.set_temperature
     target:
