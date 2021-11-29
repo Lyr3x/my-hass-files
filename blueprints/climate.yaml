@@ -1,6 +1,7 @@
 blueprint:
   name: Window open, climate off after a defined time
-  description: An automation that turns off a running your climate device for exmple a heater
+  description:
+    An automation that turns off a running your climate device for exmple a heater
     or an air conditioning if a window sensor is open for a specific time. It waits
     until the window is closed again in order to turn the climate entity on again.
   domain: automation
@@ -49,48 +50,24 @@ blueprint:
           unit_of_measurement: °C
           mode: slider
           step: 1.0
-    to_window_state:
-      name: To window state
-      description: The state the window sensor should be in to trigger the automation.
-      default: on
-      selector:
-        select:
-          options:
-            - on
-            - off
-    from_window_state:
-      name: From window state
-      description: The state the window sensor should comes from
-      default: off
-      selector:
-        select:
-          options:
-            - on
-            - off
 trigger:
-- platform: state
-  entity_id: !input 'window_entity'
-  to: !input 'to_window_state'
-  for: !input 'minimum_open_time'
-condition:
-- condition: not
-  conditions:
-    - condition: state
-      entity_id: !input 'climate_target'
-      state: !input 'from_window_state'
-action:
-- service: climate.set_temperature
-  target:
-    entity_id: !input 'climate_target'
-  data:
-    temperature: !input 'climate_off_temperature'
-- wait_for_trigger:
   - platform: state
-    entity_id: !input 'window_entity'
-    to: !input 'to_window_state'
-  continue_on_timeout: false
-- service: climate.set_temperature
-  target:
-    entity_id: !input 'climate_target'
-  data:
-    temperature: !input 'climate_on_temperature'
+    entity_id: !input "window_entity"
+    to: off
+    for: !input "minimum_open_time"
+action:
+  - service: climate.set_temperature
+    target:
+      entity_id: !input "climate_target"
+    data:
+      temperature: !input "climate_off_temperature"
+  - wait_for_trigger:
+      - platform: state
+        entity_id: !input "window_entity"
+        to: on
+    continue_on_timeout: false
+  - service: climate.set_temperature
+    target:
+      entity_id: !input "climate_target"
+    data:
+      temperature: !input "climate_on_temperature"
