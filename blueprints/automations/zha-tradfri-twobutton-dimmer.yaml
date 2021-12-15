@@ -40,15 +40,14 @@ blueprint:
     brightness:
       name: Brightness
       description: Brightness of the light(s) when turning on
-      default: 50
+      default: 100
       selector:
         number:
-          min: 0.0
-          max: 100.0
+          min: 0
+          max: 100
           mode: slider
-          step: 1.0
+          step: 1
           unit_of_measurement: "%"
-
     light_step:
       name: "Step the lights this much (%)"
       default: 5
@@ -57,7 +56,6 @@ blueprint:
           min: 1
           max: 25
           step: 1
-
     light_delay_ms:
       name: "Step the lights this often (ms)"
       default: 300
