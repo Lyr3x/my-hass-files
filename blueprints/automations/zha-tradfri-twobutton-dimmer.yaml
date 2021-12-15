@@ -13,7 +13,6 @@ blueprint:
     This automation reacts to events of the IKEA TRADFRI Dimmer control
     connected through ZHA.
   domain: automation
-
   input:
     button_device:
       name: Button
@@ -30,6 +29,25 @@ blueprint:
         target:
           entity:
             domain: light
+    force_brightness:
+      name: Force turn on brightness
+      description:
+        'Force the brightness to the set level below, when the "on" button
+        on the remote is pushed and lights turn on.'
+      default: false
+      selector:
+        boolean: {}
+    brightness:
+    name: Brightness
+    description: Brightness of the light(s) when turning on
+    default: 50
+    selector:
+      number:
+        min: 0.0
+        max: 100.0
+        mode: slider
+        step: 1.0
+        unit_of_measurement: "%"
 
     light_step:
       name: "Step the lights this much (%)"
@@ -73,10 +91,20 @@ action:
           - condition: template
             value_template: '{{ trigger.event.data.command == "on" }}'
         sequence:
-          - service: light.turn_on
-            target: !input light_target
-            data_template:
-              transition: 0.5
+          - choose:
+              - conditions: "{{ force_brightness }}"
+                sequence:
+                  - service: light.toggle
+                    target: !input "light_target"
+                    data:
+                      transition: 1
+                      brightness_pct: !input "brightness"
+            default:
+              - service: light.toggle
+                target: !input "light_target"
+                data:
+                  transition: 1
+                  brightness_pct: 100
 
       # Short-Press the off button
       - conditions:
@@ -99,10 +127,10 @@ action:
                 - service: light.turn_on
                   target: !input light_target
                   data_template:
-                    brightness_step_pct: '{{var_light_step}}'
-                    transition: '{{(var_light_delay_ms|int)/1000}}'
+                    brightness_step_pct: "{{var_light_step}}"
+                    transition: "{{(var_light_delay_ms|int)/1000}}"
                 - delay:
-                    milliseconds: '{{var_light_delay_ms}}'
+                    milliseconds: "{{var_light_delay_ms}}"
 
       # Long-Press the off button
       - conditions:
@@ -115,10 +143,10 @@ action:
                 - service: light.turn_on
                   target: !input light_target
                   data_template:
-                    brightness_step_pct: '-{{var_light_step}}'
-                    transition: '{{(var_light_delay_ms|int)/1000}}'
+                    brightness_step_pct: "-{{var_light_step}}"
+                    transition: "{{(var_light_delay_ms|int)/1000}}"
                 - delay:
-                    milliseconds: '{{var_light_delay_ms}}'
-                    
+                    milliseconds: "{{var_light_delay_ms}}"
+
     # Any other event will cancel the repeat loops (i.e. releasing the [on|off] button)
     default: []
