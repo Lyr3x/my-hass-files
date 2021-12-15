@@ -38,16 +38,16 @@ blueprint:
       selector:
         boolean: {}
     brightness:
-    name: Brightness
-    description: Brightness of the light(s) when turning on
-    default: 50
-    selector:
-      number:
-        min: 0.0
-        max: 100.0
-        mode: slider
-        step: 1.0
-        unit_of_measurement: "%"
+      name: Brightness
+      description: Brightness of the light(s) when turning on
+      default: 50
+      selector:
+        number:
+          min: 0.0
+          max: 100.0
+          mode: slider
+          step: 1.0
+          unit_of_measurement: "%"
 
     light_step:
       name: "Step the lights this much (%)"
