@@ -1,0 +1,124 @@
+---
+# | Button      | Action              |
+# | ----------- | ------------------- |
+# | on (short)  | Turn the light on   |
+# | off (short) | Turn the light off  |
+# | on (long)   | Increase brightness |
+# | off (long)  | Decrease brightness |
+
+blueprint:
+  name: IKEA TRADFRI 2 Button Dimmer with brightness control
+
+  description: >-
+    This automation reacts to events of the IKEA TRADFRI Dimmer control
+    connected through ZHA.
+  domain: automation
+
+  input:
+    button_device:
+      name: Button
+      description: The button to use for controling the lights.
+      selector:
+        device:
+          integration: zha
+          manufacturer: IKEA of Sweden
+          model: TRADFRI on/off switch
+    light_target:
+      name: Lights
+      description: The lights to control.
+      selector:
+        target:
+          entity:
+            domain: light
+
+    light_step:
+      name: "Step the lights this much (%)"
+      default: 5
+      selector:
+        number:
+          min: 1
+          max: 25
+          step: 1
+
+    light_delay_ms:
+      name: "Step the lights this often (ms)"
+      default: 300
+      selector:
+        number:
+          min: 100
+          max: 5000
+          step: 50
+
+mode: restart
+max_exceeded: silent
+
+variables:
+  var_button_device: !input button_device
+  var_light_target: !input light_target
+  var_light_step: !input light_step
+  var_light_delay_ms: !input light_delay_ms
+
+trigger:
+  - platform: event
+    event_type: zha_event
+
+condition:
+  - condition: template
+    value_template: "{{ trigger.event.data.device_id == var_button_device }}"
+
+action:
+  - choose:
+      # Short-Press the on button
+      - conditions:
+          - condition: template
+            value_template: '{{ trigger.event.data.command == "on" }}'
+        sequence:
+          - service: light.turn_on
+            target: !input light_target
+            data_template:
+              transition: 0.5
+
+      # Short-Press the off button
+      - conditions:
+          - condition: template
+            value_template: '{{ trigger.event.data.command == "off" }}'
+        sequence:
+          - service: light.turn_off
+            target: !input light_target
+            data_template:
+              transition: 0.5
+
+      # Long-Press the on button
+      - conditions:
+          - condition: template
+            value_template: '{{ trigger.event.data.command == "move_with_on_off" }}'
+        sequence:
+          - repeat:
+              while: []
+              sequence:
+                - service: light.turn_on
+                  target: !input light_target
+                  data_template:
+                    brightness_step_pct: '{{var_light_step}}'
+                    transition: '{{(var_light_delay_ms|int)/1000}}'
+                - delay:
+                    milliseconds: '{{var_light_delay_ms}}'
+
+      # Long-Press the off button
+      - conditions:
+          - condition: template
+            value_template: '{{ trigger.event.data.command == "move" }}'
+        sequence:
+          - repeat:
+              while: []
+              sequence:
+                - service: light.turn_on
+                  target: !input light_target
+                  data_template:
+                    brightness_step_pct: '-{{var_light_step}}'
+                    transition: '{{(var_light_delay_ms|int)/1000}}'
+                - delay:
+                    milliseconds: '{{var_light_delay_ms}}'
+                    
+    # Any other event will cancel the repeat loops (i.e. releasing the [on|off] button)
+    default: []
