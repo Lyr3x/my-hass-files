@@ -30,7 +30,6 @@ blueprint:
       description:
         'Force the brightness to the set level below, when the "on" button
         on the remote is pushed and lights turn on.
-
         '
       default: false
       selector:
@@ -38,7 +37,7 @@ blueprint:
     brightness:
       name: Brightness
       description: Brightness of the light(s) when turning on
-      default: 50
+      default: 100
       selector:
         number:
           min: 0.0
